@@ -1,39 +1,44 @@
-'use strict'
+"use strict"
 
-const fp = require('fastify-plugin')
+const fp = require("fastify-plugin")
 
-const fastifyPostHog = (fastify, options, done) => {
-  const { apiKey, name, ...postHogOptions } = options
+const fastifyStripe = (fastify, options, done) => {
+  const { apiKey, name, ...stripeOptions } = options
 
   if (!apiKey) {
-    return done(new Error('You must provide a PostHog API key'))
+    return done(new Error("You must provide a Stripe API key"))
   }
 
-  const { PostHog } = require('posthog-node')
-  const posthog = new PostHog(apiKey, postHogOptions)
+  const stripe = require("stripe")(apiKey, stripeOptions)
 
   if (name) {
-    if (posthog[name]) {
-      return done(new Error(`fastify-posthog '${name}' is a reserved keyword`))
-    } else if (!fastify.posthog) {
-      fastify.decorate('posthog', Object.create(null))
-    } else if (Object.prototype.hasOwnProperty.call(fastify.posthog, name)) {
-      return done(new Error(`Posthog '${name}' instance name has already been registered`))
+    if (stripe[name]) {
+      return done(
+        new Error(`fastify-stripe-versioned '${name}' is a reserved keyword`)
+      )
+    } else if (!fastify.stripe) {
+      fastify.decorate("stripe", Object.create(null))
+    } else if (Object.prototype.hasOwnProperty.call(fastify.stripe, name)) {
+      return done(
+        new Error(`Stripe '${name}' instance name has already been registered`)
+      )
     }
 
-    fastify.posthog[name] = posthog
+    fastify.stripe[name] = stripe
   } else {
-    if (fastify.posthog) {
-      return done(new Error('fastify-posthog has already been registered'))
+    if (fastify.stripe) {
+      return done(
+        new Error("fastify-stripe-versioned has already been registered")
+      )
     } else {
-      fastify.decorate('posthog', posthog)
+      fastify.decorate("stripe", stripe)
     }
   }
 
   done()
 }
 
-module.exports = fp(fastifyPostHog, {
-  fastify: '>=4.0.0',
-  name: 'fastify-posthog'
+module.exports = fp(fastifyStripe, {
+  fastify: ">=4.0.0",
+  name: "fastify-stripe-versioned",
 })

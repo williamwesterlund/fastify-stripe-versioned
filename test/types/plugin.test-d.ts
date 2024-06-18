@@ -1,6 +1,6 @@
-import Fastify from "fastify"
-import { expectAssignable, expectType } from "tsd"
-import { PostHog, type PostHogOptions } from "posthog-node"
+// import Fastify from "fastify"
+// import { expectAssignable, expectType } from "tsd"
+// import { PostHog, type PostHogOptions } from "posthog-node"
 // import fastifyPostHog, { FastifyPostHogNamedInstance } from "../../plugin"
 
 // const app = Fastify()

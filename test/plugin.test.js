@@ -1,143 +1,157 @@
-'use strict'
+"use strict"
 
-const { test } = require('tap')
-const Fastify = require('fastify')
-const fastifyPostHog = require('../plugin') // Adjust the path as necessary
+const { test } = require("tap")
+const Fastify = require("fastify")
+const fastifyStripe = require("../plugin") // Adjust the path as necessary
 
-test('fastify.posthog namespace should exist', async (t) => {
-  t.plan(4)
+test("fastify.stripe namespace should exist", async (t) => {
+  t.plan(7)
 
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
 
-  await fastify.register(fastifyPostHog, {
-    apiKey: 'test_posthog_api_key',
-    host: 'https://eu.posthog.com',
-    maxBatchSize: 1337
+  await fastify.register(fastifyStripe, {
+    apiKey: "test_stripe_api_key",
+    apiVersion: "2024-04-10",
+    maxNetworkRetries: 3,
+    timeout: 20000,
+    port: 8080,
   })
 
   await fastify.ready()
 
-  t.ok(fastify.posthog)
-  t.ok(typeof fastify.posthog.capture === 'function')
-  t.ok(fastify.posthog.options.host === 'https://eu.posthog.com')
-  t.ok(fastify.posthog.options.maxBatchSize === 1337)
+  t.ok(fastify.stripe)
+  t.ok(fastify.stripe.balance)
+  t.ok(fastify.stripe.customers)
+
+  t.equal(fastify.stripe._api.maxNetworkRetries, 3)
+  t.equal(fastify.stripe._api.timeout, 20000)
+  t.equal(fastify.stripe._api.version, "2024-04-10")
+  t.equal(fastify.stripe._api.port, 8080)
 })
 
-test('fastify.posthog should allow for named instances', async (t) => {
-  t.plan(3)
-
-  const fastify = Fastify()
-  t.teardown(fastify.close.bind(fastify))
-
-  await fastify.register(fastifyPostHog, {
-    apiKey: 'test_posthog_api_key',
-    host: 'https://eu.posthog.com',
-    name: 'testInstance'
-  })
-
-  await fastify.ready()
-
-  t.ok(fastify.posthog.testInstance)
-  t.ok(typeof fastify.posthog.testInstance.capture === 'function')
-  t.notOk(
-    fastify.posthog.capture,
-    'Default instance should not exist when named instance is used'
-  )
-})
-
-test('it should fail without a PostHog API key', async (t) => {
-  const fastify = Fastify()
-  t.teardown(fastify.close.bind(fastify))
-
-  fastify.register(fastifyPostHog, {})
-
-  try {
-    await fastify.ready()
-  } catch (err) {
-    t.equal(err.message, 'You must provide a PostHog API key')
-  }
-})
-
-test('it should not allow reserved keyword as instance name', async (t) => {
-  const fastify = Fastify()
-  t.teardown(fastify.close.bind(fastify))
-
-  fastify.register(fastifyPostHog, {
-    apiKey: 'test_posthog_api_key',
-    name: 'capture' // Using 'capture' as it's a method on PostHog instance
-  })
-
-  try {
-    await fastify.ready()
-  } catch (err) {
-    t.equal(err.message, "fastify-posthog 'capture' is a reserved keyword")
-  }
-})
-
-test('it should not allow registering the same named instance more than once', async (t) => {
-  const fastify = Fastify()
-  t.teardown(fastify.close.bind(fastify))
-
-  await fastify.register(fastifyPostHog, {
-    apiKey: 'test_posthog_api_key',
-    name: 'testInstance'
-  })
-
-  fastify.register(fastifyPostHog, {
-    apiKey: 'test_posthog_api_key',
-    name: 'testInstance'
-  })
-
-  try {
-    await fastify.ready()
-  } catch (err) {
-    t.equal(err.message, "Posthog 'testInstance' instance name has already been registered")
-  }
-})
-
-test('it should not allow registering more than one unnamed instance', async (t) => {
-  const fastify = Fastify()
-  t.teardown(fastify.close.bind(fastify))
-
-  await fastify.register(fastifyPostHog, {
-    apiKey: 'test_posthog_api_key'
-  })
-
-  fastify.register(fastifyPostHog, {
-    apiKey: 'test_posthog_api_key'
-  })
-
-  try {
-    await fastify.ready()
-  } catch (err) {
-    t.equal(err.message, 'fastify-posthog has already been registered')
-  }
-})
-
-test('fastify-posthog should not throw if registered within different scopes (with and without named instances)', (t) => {
+test("fastify.stripe should allow for named instances", async (t) => {
   t.plan(2)
 
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
 
-  fastify.register(function scopeOne (instance, opts, done) {
-    instance.register(fastifyPostHog, {
-      apiKey: 'test_posthog_api_key'
+  await fastify.register(fastifyStripe, {
+    apiKey: "test_stripe_api_key",
+    apiVersion: "2024-04-10",
+    maxNetworkRetries: 3,
+    timeout: 20000,
+    port: 8080,
+    name: "testInstance",
+  })
+
+  await fastify.ready()
+
+  t.ok(fastify.stripe.testInstance)
+  t.notOk(
+    fastify.stripe.customers,
+    "Default instance should not exist when named instance is used"
+  )
+})
+
+test("it should fail without a Stripe API key", async (t) => {
+  const fastify = Fastify()
+  t.teardown(fastify.close.bind(fastify))
+
+  fastify.register(fastifyStripe, {})
+
+  try {
+    await fastify.ready()
+  } catch (err) {
+    t.equal(err.message, "You must provide a Stripe API key")
+  }
+})
+
+test("it should not allow reserved keyword as instance name", async (t) => {
+  const fastify = Fastify()
+  t.teardown(fastify.close.bind(fastify))
+
+  fastify.register(fastifyStripe, {
+    apiKey: "test_stripe_api_key",
+    name: "customers", // Using 'customers' as it's a method on PostHog instance
+  })
+
+  try {
+    await fastify.ready()
+  } catch (err) {
+    t.equal(
+      err.message,
+      "fastify-stripe-versioned 'customers' is a reserved keyword"
+    )
+  }
+})
+
+test("it should not allow registering the same named instance more than once", async (t) => {
+  const fastify = Fastify()
+  t.teardown(fastify.close.bind(fastify))
+
+  await fastify.register(fastifyStripe, {
+    apiKey: "test_stripe_api_key",
+    name: "testInstance",
+  })
+
+  fastify.register(fastifyStripe, {
+    apiKey: "test_stripe_api_key",
+    name: "testInstance",
+  })
+
+  try {
+    await fastify.ready()
+  } catch (err) {
+    t.equal(
+      err.message,
+      "Stripe 'testInstance' instance name has already been registered"
+    )
+  }
+})
+
+test("it should not allow registering more than one unnamed instance", async (t) => {
+  const fastify = Fastify()
+  t.teardown(fastify.close.bind(fastify))
+
+  await fastify.register(fastifyStripe, {
+    apiKey: "test_stripe_api_key",
+  })
+
+  fastify.register(fastifyStripe, {
+    apiKey: "test_stripe_api_key",
+  })
+
+  try {
+    await fastify.ready()
+  } catch (err) {
+    t.equal(err.message, "fastify-stripe-versioned has already been registered")
+  }
+})
+
+test("fastify-stripe-versioned should not throw if registered within different scopes (with and without named instances)", (t) => {
+  t.plan(2)
+
+  const fastify = Fastify()
+  t.teardown(fastify.close.bind(fastify))
+
+  fastify.register(function scopeOne(instance, opts, done) {
+    instance.register(fastifyStripe, {
+      apiKey: "test_stripe_api_key",
     })
 
     done()
   })
 
-  fastify.register(function scopeTwo (instance, opts, done) {
-    instance.register(fastifyPostHog, {
-      apiKey: 'test_posthog_api_key',
-      name: 'testInstance'
+  fastify.register(function scopeTwo(instance, opts, done) {
+    instance.register(fastifyStripe, {
+      apiKey: "test_stripe_api_key",
+      name: "testInstance",
     })
 
-    instance.register(fastifyPostHog, {
-      apiKey: 'test_posthog_api_key',
-      name: 'anotherTestInstance'
+    instance.register(fastifyStripe, {
+      apiKey: "test_stripe_api_key",
+      name: "anotherTestInstance",
     })
 
     done()

@@ -1,7 +1,7 @@
 {
-  "name": "fastify-posthog",
+  "name": "fastify-stripe-versioned",
   "version": "1.0.0",
-  "description": "PostHog Analytics initialization and encapsulation in Fastify framework",
+  "description": "Stripe initialization and encapsulation in Fastify framework",
   "main": "plugin.js",
   "types": "plugin.d.ts",
   "scripts": {
@@ -17,20 +17,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/williamwesterlund/fastify-posthog.git"
+    "url": "git+https://github.com/williamwesterlund/fastify-stripe-versioned.git"
   },
   "keywords": [
     "analytics",
     "fastify",
     "fastify-plugin",
-    "posthog"
+    "stripe"
   ],
   "author": "William Westerlund <william.e.westerlund@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/williamwesterlund/fastify-posthog/issues"
+    "url": "https://github.com/williamwesterlund/fastify-stripe-versioned/issues"
   },
-  "homepage": "https://github.com/williamwesterlund/fastify-posthog#readme",
+  "homepage": "https://github.com/williamwesterlund/fastify-stripe-versioned#readme",
   "engines": {
     "node": ">=16"
   },
@@ -42,12 +42,12 @@
     "tap": "^15.1.6",
     "typescript": "^5.3.2",
     "tsd": "^0.19.1",
-    "posthog-node": "^4.0.0",
+    "stripe": "^15.12.0",
     "standard": "^16.0.4",
     "dotenv": "^16.0.0"
   },
   "peerDependencies": {
-    "posthog-node": ">=4.0.0"
+    "stripe": ">=15.0.0"
   },
   "tsd": {
     "directory": "test/types"

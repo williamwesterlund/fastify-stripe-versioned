@@ -1,33 +1,35 @@
 import { FastifyPluginCallback } from "fastify"
-import { PostHog, PostHogOptions } from "posthog-node"
+import Stripe from "stripe"
 
 /**
- * @docs https://posthog.com/docs/libraries/node
+ * @docs https://stripe.com/docs
  */
-export interface FastifyPostHogOptions extends PostHogOptions {
+export interface FastifyStripeOptions extends Stripe.StripeConfig {
   /**
-   * PostHog API Key
-   * @docs https://posthog.com/docs/libraries/node
+   * Stripe API Key
+   *
+   * @docs https://stripe.com/docs/api/authentication
+   * @docs https://stripe.com/docs/keys
    */
   apiKey: string
 
   /**
-   * fastify-posthog instance name, for supporting multiple instances
+   * fastify-stripe-versioned instance name, for supporting multiple instances
    */
   name?: string
 }
 
-export interface FastifyPostHogNamedInstance {
-  [name: string]: PostHog;
+export interface FastifyStripeNamedInstance {
+  [name: string]: Stripe
 }
 
-export type FastifyPostHog = FastifyPostHogNamedInstance & PostHog;
+export type FastifyStripe = FastifyStripeNamedInstance & Stripe
 
 declare module "fastify" {
   interface FastifyInstance {
-    posthog: FastifyPostHog
+    stripe: FastifyStripe
   }
 }
 
-export const FastifyPostHogPlugin: FastifyPluginCallback<FastifyPostHogOptions>
-export default FastifyPostHogPlugin
+export const FastifyStripePlugin: FastifyPluginCallback<FastifyStripeOptions>
+export default FastifyStripePlugin
